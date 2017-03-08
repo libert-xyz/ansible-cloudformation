@@ -1,0 +1,8 @@
+---
+- name: Setup VPC and Network
+  hosts: localhost
+  roles:
+    - vpc
+    - network
+
+    

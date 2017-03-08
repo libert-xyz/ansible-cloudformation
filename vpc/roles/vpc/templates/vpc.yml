@@ -1,0 +1,32 @@
+#jinja2:lstrip_blocks:False,trim_blocks:False
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  myVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: {{vpc.cidr}}
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+      - Key: Name
+        Value: {{ stack_prefix | lower }}_vpc
+
+  IG:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: {{ stack_prefix | lower }}_ig
+
+  VPCattachIG:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: {Ref: myVPC}
+      InternetGatewayId: {Ref: IG}
+
+Outputs:
+  Vpc:
+    Value: {Ref : myVPC}
+  InternetGateway:
+    Value: {Ref: IG}

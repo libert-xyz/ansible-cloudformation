@@ -1,0 +1,14 @@
+---
+region: us-east-1
+stack_prefix: vpcans
+vpc:
+  cidr: 192.168.0.0/16
+  slash: 24
+
+segments:
+  Public:
+    azs: 3
+    slash: 24
+  Private:
+    azs: 3
+    slash: 24
