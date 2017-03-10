@@ -1,0 +1,31 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  myVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 192.168.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+      - Key: Name
+        Value: vpcans_vpc
+
+  IG:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: vpcans_ig
+
+  VPCattachIG:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: {Ref: myVPC}
+      InternetGatewayId: {Ref: IG}
+
+Outputs:
+  Vpc:
+    Value: {Ref : myVPC}
+  InternetGateway:
+    Value: {Ref: IG}

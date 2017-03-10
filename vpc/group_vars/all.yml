@@ -8,7 +8,7 @@ vpc:
 segments:
   Public:
     azs: 3
-    slash: 24
+    slash: 26
   Private:
     azs: 3
-    slash: 24
+    slash: 26

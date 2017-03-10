@@ -1,0 +1,202 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Base Network Infrastructure
+
+Parameters:
+  Vpc:
+    Type: String
+
+Resources:
+
+# Route Tables #
+  InternalRouteTbl:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: { Ref: Vpc }
+      Tags:
+        - Key: Name
+          Value: vpcans-internal-rt
+
+  ExternalRouteTbl:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: { Ref: Vpc }
+      Tags:
+        - Key: Name
+          Value: vpcans-external-rt
+
+# Subnets and Associations #
+
+  
+  
+  # Subnets #
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1a
+      CidrBlock: 192.168.0.0/26
+      VpcId: { Ref: Vpc }
+      Tags:
+        - Key: Name
+          Value: vpcans-public
+
+  # Associate Subnet with RouteTable #
+  
+    
+  
+
+  PublicRouteTblAss1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: { Ref: ExternalRouteTbl }
+      SubnetId: { Ref: PublicSubnet1 }
+
+  
+  # Subnets #
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1b
+      CidrBlock: 192.168.0.64/26
+      VpcId: { Ref: Vpc }
+      Tags:
+        - Key: Name
+          Value: vpcans-public
+
+  # Associate Subnet with RouteTable #
+  
+    
+  
+
+  PublicRouteTblAss2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: { Ref: ExternalRouteTbl }
+      SubnetId: { Ref: PublicSubnet2 }
+
+  
+  # Subnets #
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1c
+      CidrBlock: 192.168.0.128/26
+      VpcId: { Ref: Vpc }
+      Tags:
+        - Key: Name
+          Value: vpcans-public
+
+  # Associate Subnet with RouteTable #
+  
+    
+  
+
+  PublicRouteTblAss3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: { Ref: ExternalRouteTbl }
+      SubnetId: { Ref: PublicSubnet3 }
+
+  
+
+  
+  
+  # Subnets #
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1a
+      CidrBlock: 192.168.1.0/26
+      VpcId: { Ref: Vpc }
+      Tags:
+        - Key: Name
+          Value: vpcans-private
+
+  # Associate Subnet with RouteTable #
+  
+    
+  
+
+  PrivateRouteTblAss1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: { Ref: InternalRouteTbl }
+      SubnetId: { Ref: PrivateSubnet1 }
+
+  
+  # Subnets #
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1b
+      CidrBlock: 192.168.1.64/26
+      VpcId: { Ref: Vpc }
+      Tags:
+        - Key: Name
+          Value: vpcans-private
+
+  # Associate Subnet with RouteTable #
+  
+    
+  
+
+  PrivateRouteTblAss2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: { Ref: InternalRouteTbl }
+      SubnetId: { Ref: PrivateSubnet2 }
+
+  
+  # Subnets #
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1c
+      CidrBlock: 192.168.1.128/26
+      VpcId: { Ref: Vpc }
+      Tags:
+        - Key: Name
+          Value: vpcans-private
+
+  # Associate Subnet with RouteTable #
+  
+    
+  
+
+  PrivateRouteTblAss3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: { Ref: InternalRouteTbl }
+      SubnetId: { Ref: PrivateSubnet3 }
+
+  
+
+
+Outputs:
+
+  PublicSubnets:
+    Value:
+      "Fn::Join":
+        - ","
+        -
+        
+          - {Ref: "PublicSubnet1"}
+        
+          - {Ref: "PublicSubnet2"}
+        
+          - {Ref: "PublicSubnet3"}
+        
+
+  PrivateSubnets:
+    Value:
+      "Fn::Join":
+        - ","
+        -
+        
+          - {Ref: "PrivateSubnet1"}
+        
+          - {Ref: "PrivateSubnet2"}
+        
+          - {Ref: "PrivateSubnet3"}
+        
