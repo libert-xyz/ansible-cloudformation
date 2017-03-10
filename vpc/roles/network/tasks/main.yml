@@ -12,9 +12,9 @@
     region: "{{region}}"
     disable_rollback: false
     template: rendered_templates/network.yml
-    template_format: yaml
     template_parameters:
       Vpc: "{{vpc_stack.stack_outputs.Vpc}}"
+      Ig: "{{vpc_stack.stack_outputs.InternetGateway}}"
     tags:
       Stack: "{{stack_prefix}}-network"
   register: network_stack

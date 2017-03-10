@@ -11,7 +11,6 @@
     region: "{{region}}"
     disable_rollback:  false
     template: rendered_templates/vpc.yml
-    template_format: yaml
     tags:
       Stack: "{{stack_prefix}}-vpc"
   register: vpc_stack

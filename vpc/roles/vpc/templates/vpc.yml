@@ -22,11 +22,11 @@ Resources:
   VPCattachIG:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      VpcId: {Ref: myVPC}
-      InternetGatewayId: {Ref: IG}
+      VpcId: !Ref: myVPC
+      InternetGatewayId: !Ref: IG
 
 Outputs:
   Vpc:
-    Value: {Ref : myVPC}
+    Value: !Ref : myVPC
   InternetGateway:
-    Value: {Ref: IG}
+    Value: !Ref: IG

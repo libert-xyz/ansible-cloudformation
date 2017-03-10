@@ -6,6 +6,8 @@ Description: Base Network Infrastructure
 Parameters:
   Vpc:
     Type: String
+  Ig:
+    Type: String
 
 Resources:
 
@@ -172,6 +174,17 @@ Resources:
 
   
 
+
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    #DependsOn: Vpc
+    Properties:
+      RouteTableId:
+        Ref: ExternalRouteTbl
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: Ig
 
 Outputs:
 
