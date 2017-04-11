@@ -1,0 +1,11 @@
+---
+- name: Create VPC Stack
+  cloudformation:
+    stack_name: ansible
+    state: present
+    region: "{{region}}"
+    disable_rollback:  false
+    template: stack.yml
+    tags:
+      Stack: ansible
+  register: ansible_aws

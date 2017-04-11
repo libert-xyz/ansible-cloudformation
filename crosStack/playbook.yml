@@ -1,0 +1,10 @@
+---
+- name: Create a AWS Stack
+  hosts: localhost
+  roles:
+    - vpc
+    - sRoles
+    - elb
+    - launchconfig
+    - autoscaling
+    - codedeploy

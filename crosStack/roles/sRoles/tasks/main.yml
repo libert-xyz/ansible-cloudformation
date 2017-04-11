@@ -1,0 +1,16 @@
+---
+- name: "{{ stack_prefix }}-Roles"
+  template:
+    src: roles.yml.j2
+    dest: rendered_templates/roles.yml
+
+- name: "Create {{ stack_prefix }}-Roles"
+  cloudformation:
+    stack_name: "{{stack_prefix}}-roles"
+    state: present
+    disable_rollback: true
+    region: "{{region}}"
+    template: rendered_templates/roles.yml
+    tags:
+      Stack: "{{stack_prefix}}-roles"
+  register: roles_stack

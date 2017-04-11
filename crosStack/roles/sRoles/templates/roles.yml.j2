@@ -1,0 +1,104 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: {{ stack_prefix}}-Roles
+
+####### Services creation #########
+Resources:
+  RoleInstances:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+
+      Path: "/"
+      RoleName: !Join ["-",["InstanceRole", !Ref "AWS::Region"]]
+      Policies:
+        -
+          PolicyName: !Join ["-",["S3FullAccess", !Ref "AWS::Region"]]
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "s3:*"
+                Resource: "*"
+        -
+          PolicyName: !Join ["-",["CloudWatch", !Ref "AWS::Region"]]
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "cloudwatch:PutMetricAlarm"
+                Resource: "*"
+
+  #### IAM Instance Role ####
+
+  InstanceRole:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref RoleInstances
+
+
+  ### Code Deploy Role ###
+
+  CodeDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "codedeploy.amazonaws.com"
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      RoleName: !Join ["-",["CodeDeployRole", !Ref "AWS::Region"]]
+      Policies:
+        -
+          PolicyName: !Join ["-",["CodeDeployPolicy", !Ref "AWS::Region"]]
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - autoscaling:PutLifecycleHook
+                  - autoscaling:DeleteLifecycleHook
+                  - autoscaling:RecordLifecycleActionHeartbeat
+                  - autoscaling:CompleteLifecycleAction
+                  - autoscaling:DescribeAutoscalingGroups
+                  - autoscaling:PutInstanceInStandby
+                  - autoscaling:PutInstanceInService
+                  - autoscaling:DescribeLifecycleHooks
+                  - ec2:Describe*
+                Resource: "*"
+
+######### Outputs ##########
+Outputs:
+  instancerole:
+    Description: IAM Role for the instances
+    Value: !Ref InstanceRole
+    Export:
+      Name: instancerole
+
+
+  codedeployrole:
+    Description: Code Deploy Role
+    Value: !GetAtt CodeDeployRole.Arn
+    Export:
+      Name: CodeDeployRole

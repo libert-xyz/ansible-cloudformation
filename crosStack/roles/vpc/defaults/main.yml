@@ -1,0 +1,5 @@
+---
+# defaults file for stack
+
+#### Warning ##### If change - Recreate the whole Stack
+vpcName: LrsVpc

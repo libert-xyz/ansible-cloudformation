@@ -1,0 +1,36 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: {{ stack_prefix }} Code Deploy
+
+
+####### Services creation #########
+Resources:
+  CodeDeployApp:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: {{ appname }}
+
+  CodeDeployAppDeploy:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref CodeDeployApp
+      AutoScalingGroups:
+      - !ImportValue AutoScaling
+
+      DeploymentGroupName: Staging
+      Deployment:
+        Description: "A base App"
+        IgnoreApplicationStopFailures: true
+        Revision:
+          RevisionType: GitHub
+          GitHubLocation:
+            CommitId: {{ commid_id }}
+            Repository: {{ repository }}
+      ServiceRoleArn: !ImportValue CodeDeployRole
+
+
+######### Outputs ##########
+Outputs:
+  Url:
+    Description: CodeDeploy
+    Value: !Ref CodeDeployAppDeploy

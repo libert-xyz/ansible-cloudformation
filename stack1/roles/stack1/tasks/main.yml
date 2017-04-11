@@ -1,0 +1,19 @@
+---
+
+# - name: template render
+#   template:
+#     src: stack.yml.j2
+#     dest: cloudFomationTemplate/stack.yml
+
+- name: Create Stack1
+  cloudformation:
+    stack_name: ansible
+    state: present
+    region: us-east-1
+    disable_rollback:  false
+    template: cloudFomationTemplate/stack.yml
+    template_parameters:
+      Keyname: "{{ keyname }}"
+    tags:
+      Stack: ansible
+  register: ansible_aws

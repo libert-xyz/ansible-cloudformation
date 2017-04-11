@@ -1,0 +1,16 @@
+---
+- name: Render Network VPC Template
+  template:
+    src: vpc.yml.j2
+    dest: rendered_templates/vpc.yml
+
+- name: Create VPC Stack
+  cloudformation:
+    stack_name: "{{stack_prefix}}-vpc"
+    state: present
+    disable_rollback: true
+    region: "{{region}}"
+    template: rendered_templates/vpc.yml
+    tags:
+      Stack: "{{stack_prefix}}-vpc"
+  register: vpc_stack

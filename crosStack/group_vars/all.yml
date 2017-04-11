@@ -1,0 +1,9 @@
+---
+##Warning##
+##if changed build a new Stack, exports errors##
+
+region: us-east-1
+stack_prefix: ansible
+
+
+pem: myAws

@@ -1,0 +1,16 @@
+### Safe to Update - No interuption ##
+## Warning Remove - interuption ##
+
+healthCheck_target: HTTP:80/
+
+
+### Safe to Update/Add/Delete - No interuption ##
+Listeners:
+
+  - LoadBalancerPort: 80
+    InstancePort: 80
+    Protocol: HTTP
+
+  - LoadBalancerPort: 8080
+    InstancePort: 8080
+    Protocol: HTTP

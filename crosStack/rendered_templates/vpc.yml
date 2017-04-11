@@ -1,0 +1,436 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Virtual Private Cloud (us-east-1 Only)
+
+####### Services creation #########
+Resources:
+  LrsVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.10.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: LrsVpc
+        - Key: CidrBlock
+          Value: Class 22 - 21
+
+  ## Subnets Creation ##
+
+  ## Public Subnets ##
+  ## Mask /22 , 1022 host per subnet, 1024 subnets
+  Pub1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.1.0/22
+      AvailabilityZone: us-east-1a
+      Tags:
+        - Key: Name
+          Value: Pub-1a-10.10.1.0
+
+  Pub1b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.4.0/22
+      AvailabilityZone: us-east-1b
+      Tags:
+        - Key: Name
+          Value: Pub-1b-10.10.4.0
+
+  Pub1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.8.0/22
+      AvailabilityZone: us-east-1c
+      Tags:
+        - Key: Name
+          Value: Pub-1c-10.10.8.0
+
+  Pub1d:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.12.0/22
+      AvailabilityZone: us-east-1d
+      Tags:
+        - Key: Name
+          Value: Pub-1d-10.10.12.0
+
+  Pub1e:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.16.0/22
+      AvailabilityZone: us-east-1e
+      Tags:
+        - Key: Name
+          Value: Pub-1e-10.10.16.0
+
+
+    ## Public Up to -> 10.10.31.255 ##
+
+  ## Private Subnets #1 ##
+  ## Mask /20 , 4094 host per subnet, 16 subnets
+
+  Priv1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.32.0/20
+      AvailabilityZone: us-east-1a
+      Tags:
+        - Key: Name
+          Value: Priv-1a-10.10.32.0
+
+
+  Priv1b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.48.0/20
+      AvailabilityZone: us-east-1b
+      Tags:
+        - Key: Name
+          Value: Priv-1b-10.10.48.0
+
+
+  Priv1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.64.0/20
+      AvailabilityZone: us-east-1c
+      Tags:
+        - Key: Name
+          Value: Priv-1c-10.10.64.0
+
+
+  Priv1d:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.80.0/20
+      AvailabilityZone: us-east-1d
+      Tags:
+        - Key: Name
+          Value: Priv-1d-10.10.80.0
+
+
+  Priv1e:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.96.0/20
+      AvailabilityZone: us-east-1e
+      Tags:
+        - Key: Name
+          Value: Priv-1e-10.10.96.20
+
+
+## Private Subnets #2 ##
+
+  Priv1aN:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.112.0/20
+      AvailabilityZone: us-east-1a
+      Tags:
+        - Key: Name
+          Value: PrivN-1a-10.10.112.0
+
+
+  Priv1bN:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.128.0/20
+      AvailabilityZone: us-east-1b
+      Tags:
+        - Key: Name
+          Value: PrivN-1b-10.10.128.0
+
+
+  Priv1cN:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.144.0/20
+      AvailabilityZone: us-east-1c
+      Tags:
+        - Key: Name
+          Value: PrivN-1c-10.10.144.0
+
+
+  Priv1dN:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.160.0/20
+      AvailabilityZone: us-east-1d
+      Tags:
+        - Key: Name
+          Value: PrivN-1d-10.10.160.0
+
+
+  Priv1eN:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LrsVpc
+      CidrBlock: 10.10.176.0/20
+      AvailabilityZone: us-east-1e
+      Tags:
+        - Key: Name
+          Value: PrivN-1e-10.10.176.0
+
+  ### Internet Gateway ###
+
+  InternetGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: LrsVpc-IGW
+
+  AttachGW:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref LrsVpc
+      InternetGatewayId: !Ref InternetGW
+
+
+  ### Public Route Table ##
+
+  PubRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LrsVpc
+      Tags:
+      - Key: Name
+        Value: Public Route Table
+
+  PubRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGW
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGW
+
+  ### Public Route Association ###
+
+  PubRouteAs1a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1a
+
+  PubRouteAs1b:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1b
+
+  PubRouteAs1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1c
+
+  PubRouteAs1d:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1d
+
+  PubRouteAs1e:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1e
+
+
+  ### Instances Security Groups ###
+
+  SecurityGroupInstances:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Instances Security Group"
+      VpcId: !Ref LrsVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !Ref SecurityGroupLoadBalancer
+
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        SourceSecurityGroupId: !Ref SecurityGroupLoadBalancer
+
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+
+      Tags:
+      - Key: Name
+        Value: Security Group Instances
+
+
+  ### Database Security Groups ###
+
+  SecurityGroupDatabase:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Database Security Group"
+      VpcId: !Ref LrsVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        SourceSecurityGroupId: !Ref SecurityGroupInstances
+
+      Tags:
+      - Key: Name
+        Value: Security Group Database
+
+  ### Load Balancer Security Groups ###
+
+  SecurityGroupLoadBalancer:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Load Balancer Security Group"
+      VpcId: !Ref LrsVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+
+      Tags:
+      - Key: Name
+        Value: Security Group Load Balancer
+
+
+######### Outputs & Exports ##########
+Outputs:
+  pub1a:
+    Description: Public 1a
+    Value: !Ref Pub1a
+    Export:
+      Name: pub1a
+
+  pub1b:
+    Description: Public 1b
+    Value: !Ref Pub1b
+    Export:
+      Name: pub1b
+
+  pub1c:
+    Description: Public 1c
+    Value: !Ref Pub1c
+    Export:
+      Name: pub1c
+
+  pub1d:
+    Description: Public 1d
+    Value: !Ref Pub1d
+    Export:
+      Name: pub1d
+
+  pub1e:
+    Description: Public 1e
+    Value: !Ref Pub1e
+    Export:
+      Name: pub1e
+
+  priv1a:
+    Description: Private 1a
+    Value: !Ref Priv1a
+    Export:
+      Name: priv1a
+
+  priv1b:
+    Description: Private 1b
+    Value: !Ref Priv1b
+    Export:
+      Name: priv1b
+
+  priv1c:
+    Description: Private 1c
+    Value: !Ref Priv1c
+    Export:
+      Name: priv1c
+
+  priv1d:
+    Description: Private 1d
+    Value: !Ref Priv1d
+    Export:
+      Name: priv1d
+
+  priv1e:
+    Description: Private 1e
+    Value: !Ref Priv1e
+    Export:
+      Name: priv1e
+
+
+  priv1aN:
+    Description: Private 1aN
+    Value: !Ref Priv1aN
+    Export:
+      Name: priv1aN
+
+  priv1bN:
+    Description: Private 1bN
+    Value: !Ref Priv1bN
+    Export:
+      Name: priv1bN
+
+  priv1cN:
+    Description: Private 1cN
+    Value: !Ref Priv1cN
+    Export:
+      Name: priv1cN
+
+  priv1dN:
+    Description: Private 1dN
+    Value: !Ref Priv1dN
+    Export:
+      Name: priv1dN
+
+  priv1eN:
+    Description: Private 1eN
+    Value: !Ref Priv1eN
+    Export:
+      Name: priv1eN
+
+
+  instanceSG:
+    Description: Instance Security Group
+    Value: !Ref SecurityGroupInstances
+    Export:
+      Name: instanceSG
+
+  databaseSG:
+    Description: Database Security Group
+    Value: !Ref SecurityGroupDatabase
+    Export:
+      Name: databaseSG
+
+  elbSG:
+    Description: ELB Security Group
+    Value: !Ref SecurityGroupLoadBalancer
+    Export:
+      Name: elbSG

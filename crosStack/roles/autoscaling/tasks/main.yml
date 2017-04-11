@@ -1,0 +1,24 @@
+---
+- name: "{{ stack_prefix }}-AutoScaling"
+  template:
+    src: autoscaling.yml.j2
+    dest: rendered_templates/autoscaling.yml
+
+- name: "Create {{ stack_prefix }}-AutoScaling"
+  cloudformation:
+    stack_name: "{{stack_prefix}}-autoscaling"
+    state: present
+    disable_rollback: true
+    region: "{{region}}"
+    template: rendered_templates/autoscaling.yml
+    tags:
+      Stack: "{{stack_prefix}}-autoscaling"
+  register: autoscaling_stack
+
+# - name: "Cloud Formation Facts"
+#   cloudformation_facts:
+#     stack_name: "{{stack_prefix}}-autoscaling"
+#     stack_resources: true
+#   register: cloud_facts
+
+#- debug: var=cloud_facts

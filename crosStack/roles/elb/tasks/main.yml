@@ -1,0 +1,16 @@
+---
+- name: "{{ stack_prefix }}-Elb"
+  template:
+    src: elb.yml.j2
+    dest: rendered_templates/elb.yml
+
+- name: "Create {{ stack_prefix }}-Elb"
+  cloudformation:
+    stack_name: "{{stack_prefix}}-elb"
+    state: present
+    disable_rollback: true
+    region: "{{region}}"
+    template: rendered_templates/elb.yml
+    tags:
+      Stack: "{{stack_prefix}}-elb"
+  register: elb_stack

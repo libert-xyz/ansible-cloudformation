@@ -1,0 +1,36 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ansible Code Deploy
+
+
+####### Services creation #########
+Resources:
+  CodeDeployApp:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: baseApp
+
+  CodeDeployAppDeploy:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref CodeDeployApp
+      AutoScalingGroups:
+      - !ImportValue AutoScaling
+
+      DeploymentGroupName: Staging
+      Deployment:
+        Description: "A base App"
+        IgnoreApplicationStopFailures: true
+        Revision:
+          RevisionType: GitHub
+          GitHubLocation:
+            CommitId: 9ffb5872e23ef05a78eac87fcc13e327e094da9d
+            Repository: rschmidtz/baseApp
+      ServiceRoleArn: !ImportValue CodeDeployRole
+
+
+######### Outputs ##########
+Outputs:
+  Url:
+    Description: CodeDeploy
+    Value: !Ref CodeDeployAppDeploy

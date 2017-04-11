@@ -1,0 +1,97 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ansible Load Balancer
+
+######## Mappings ###########
+Mappings:
+  Region2ELBAccountId:
+    us-east-1:
+      AccountId: "127311923021"
+      #Source: http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
+  Region2ARNPrefix:
+    us-east-1:
+      ARNPrefix: "arn:aws:"
+
+
+####### Services creation #########
+Resources:
+  ELB:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    DependsOn: ELBLogsBucketPolicy
+    Properties:
+      CrossZone: true
+      LoadBalancerName: ansible-ELB
+      HealthCheck:
+        Target: HTTP:80/
+        HealthyThreshold: 3
+        UnhealthyThreshold: 5
+        Interval: 30
+        Timeout: 5
+      Listeners:
+        -
+          LoadBalancerPort: 80
+          InstancePort: 80
+          Protocol: HTTP
+        -
+          LoadBalancerPort: 8080
+          InstancePort: 8080
+          Protocol: HTTP
+      
+      Subnets:
+      - !ImportValue pub1a
+      - !ImportValue pub1b
+      - !ImportValue pub1c
+      - !ImportValue pub1d
+      - !ImportValue pub1e
+
+      SecurityGroups:
+      - !ImportValue elbSG
+
+      AccessLoggingPolicy:
+        S3BucketName: !Ref ELBLogsBucket
+        S3BucketPrefix: ELBLogs
+        Enabled: True
+        EmitInterval: 5
+
+      Tags:
+      - Key: Name
+        Value: ansible-ELB
+
+  ### Logs Bucket and Policy ###
+  ELBLogsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+
+  ELBLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ELBLogsBucket
+      PolicyDocument:
+        Version: 2008-10-17
+        Statement:
+          -
+            Sid: ELBAccessLogs
+            Effect: Allow
+            Resource: !Join ["",[!FindInMap [Region2ARNPrefix,!Ref "AWS::Region",ARNPrefix],"s3:::", !Ref ELBLogsBucket, "/", "ELBLogs", "/AWSLogs/", !Ref "AWS::AccountId" , "/*" ]]
+            #Ex: arn:aws:s3:::bucket/prefix/AWSLogs/aws-account-id/*
+            Principal:
+              AWS: !FindInMap [Region2ELBAccountId, !Ref "AWS::Region", AccountId]
+            Action:
+              - "s3:PutObject"
+
+######### Outputs ##########
+Outputs:
+  Url:
+    Description: ELB URL
+    Value: !Join ["",["http://",!GetAtt ["ELB","DNSName"]]]
+
+
+  LoadBalancer:
+    Description: Load Balancer
+    Value: !Ref ELB
+    Export:
+      Name: ansible-ELB
+
+  ELBAccessLogsBucket:
+    Description: ELB Logs Bucket
+    Value: !GetAtt ["ELBLogsBucket", "DomainName"]

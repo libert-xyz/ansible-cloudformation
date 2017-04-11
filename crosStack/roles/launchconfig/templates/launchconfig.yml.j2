@@ -1,0 +1,52 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: {{ stack_prefix}} Launch Configuration
+
+
+####### Services creation #########
+Resources:
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      ImageId: {{ ami }}
+      InstanceType: {{ instanceType }}
+      SecurityGroups:
+      - !ImportValue instanceSG
+      InstanceMonitoring: false
+      KeyName: {{ pem }}
+      IamInstanceProfile: !ImportValue instancerole
+      UserData:
+        'Fn::Base64': !Sub |
+          #! /bin/bash
+
+          set -o errexit
+
+          apt-get update -y
+          apt-get -y install python-pip
+          apt-get -y install build-essential libssl-dev libffi-dev python-dev
+
+          export LC_ALL='en_US.UTF-8'
+          pip install cryptography
+          pip install ansible==2.2.0
+
+          apt-get -y install ruby
+          apt-get -y install wget
+          cd /home/ubuntu
+          wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install
+          chmod +x ./install
+          ./install auto
+          service codedeploy-agent start
+
+
+          mkdir -p /tmp/ansible
+          git clone -b dev https://github.com/rschmidtz/ansible-flask.git /tmp/ansible/
+          /usr/local/bin/ansible-playbook /tmp/ansible/playbook.yml --connection=local -i /tmp/ansible/hosts.example
+
+######### Outputs ##########
+Outputs:
+  LaunchConfig:
+    Description: Launch Configuration
+    Value: !Ref LaunchConfig
+    Export:
+      Name: LaunchConfig

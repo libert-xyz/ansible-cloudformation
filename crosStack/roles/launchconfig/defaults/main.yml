@@ -1,0 +1,16 @@
+
+
+#### Warning ##### If change - Interuption
+
+#Ubuntu Server 16.04 LTS (HVM),EBS General Purpose (SSD) Volume Type
+ami: ami-f4cc1de2
+instanceType: t2.nano
+
+
+base64:
+
+  "#!/bin/bash -x
+  apt-get install -y apache2
+  cd /var/www/html
+  echo '<html><body>Highly Available Infrastructure</body></html>' > index.html
+  systemctl restart apache2.service"

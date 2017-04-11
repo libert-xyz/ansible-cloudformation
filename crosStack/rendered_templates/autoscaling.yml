@@ -1,0 +1,83 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ansible AutoScaling Group
+
+####### Services creation #########
+Resources:
+  AutoScaling:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !ImportValue LaunchConfig
+      MinSize: 1
+      MaxSize: 2
+      VPCZoneIdentifier:
+      - !ImportValue pub1a
+      - !ImportValue pub1b
+      - !ImportValue pub1c
+      - !ImportValue pub1d
+      - !ImportValue pub1e
+      LoadBalancerNames:
+        - !ImportValue ansible-ELB
+
+  ScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScaling
+      PolicyType: SimpleScaling
+      Cooldown: 30
+      ScalingAdjustment: 1
+
+  ## Alarms ##
+
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      AlarmDescription: Alarm if CPU too high or metric disappears indicating instance is down
+      Period: 60
+      AlarmActions:
+        - !Ref ScaleUpPolicy
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScaling
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUUtilization
+      Threshold: 80
+
+
+  ScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScaling
+      PolicyType: SimpleScaling
+      Cooldown: 10
+      ScalingAdjustment: -1
+
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      AlarmDescription: Alarm if CPU too low
+      Period: 60
+      AlarmActions:
+        - !Ref ScaleDownPolicy
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScaling
+      ComparisonOperator: LessThanThreshold
+      MetricName: CPUUtilization
+      Threshold: 15
+
+######### Outputs ##########
+Outputs:
+  AUId:
+    Description: Autoscaling group
+    Value: !Ref AutoScaling
+    Export:
+      Name: AutoScaling

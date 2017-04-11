@@ -1,0 +1,12 @@
+---
+
+- name: Launch an EC2 to build AMI
+  ec2:
+    key_name: "{{ pem }}"
+    instance_type: t2.nano
+    image: "{{ ami_base }}"
+    wait: yes
+    assign_public_ip: yes
+    vpc_subnet_id: "{{ default_public_subnet }}"
+
+    

@@ -1,0 +1,67 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: High Available and Fault Tolerant Stack
+
+######## Input Part ##########
+Parameters:
+  Keyname: {{ keyname }}
+
+#####Services creation########
+Resources:
+  VPC:
+    Description: Stack VPC
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/vpc.yml"
+      TimeoutInMinutes: 12
+
+
+  Roles:
+    Description: Stack Roles and Policies
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/roles.yml"
+      TimeoutInMinutes: 7
+
+  ELB:
+    Description: Elastic Load Balancer
+    Type: AWS::CloudFormation::Stack
+    DependsOn: VPC
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/elb.yml"
+      TimeoutInMinutes: 8
+      Parameters:
+        pub1a: !GetAtt [VPC,Outputs.pub1a]
+        pub1b: !GetAtt [VPC,Outputs.pub1b]
+        pub1c: !GetAtt [VPC,Outputs.pub1c]
+        pub1d: !GetAtt [VPC,Outputs.pub1d]
+        pub1e: !GetAtt [VPC,Outputs.pub1e]
+        elbSG: !GetAtt [VPC,Outputs.elbSG]
+
+  LaunchConfiguration:
+    Description: Launch Configuration
+    Type: AWS::CloudFormation::Stack
+    DependsOn: VPC
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/launchConfig.yml"
+      TimeoutInMinutes: 5
+      Parameters:
+        SG: !GetAtt [VPC,Outputs.instanceSG]
+        Role: !GetAtt [Roles,Outputs.instancerole]
+        KeyPair: !Ref Keyname
+
+  Autoscaling:
+    Description: Autoscaling Group
+    Type: AWS::CloudFormation::Stack
+    DependsOn: ELB
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/autoscaling.yml"
+      TimeoutInMinutes: 10
+      Parameters:
+        pub1a: !GetAtt [VPC,Outputs.pub1a]
+        pub1b: !GetAtt [VPC,Outputs.pub1b]
+        pub1c: !GetAtt [VPC,Outputs.pub1c]
+        pub1d: !GetAtt [VPC,Outputs.pub1d]
+        pub1e: !GetAtt [VPC,Outputs.pub1e]
+        launchconfig: !GetAtt [LaunchConfiguration,Outputs.LaunchConfig]
+        elb: !GetAtt [ELB, Outputs.LoadBalancer]

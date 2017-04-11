@@ -1,0 +1,25 @@
+
+### Safe to Update - No interuption ##
+## Warning Remove - interuption ##
+
+
+
+### Safe to Update/Add/Delete - No interuption ##
+## Min Instances
+min_size: 1
+
+##Max Instances
+max_size: 2
+
+#ScalingAdjustment Add Instances
+add_num_ins: 1
+
+#ScalingAdjustment Delete Instances
+down_num_ins: -1
+
+
+#CPU Max - Launch New Instance
+cpu_max: 80
+
+#CPU Min - Delete Instance
+cpu_min: 15

@@ -1,0 +1,4 @@
+
+#Ubuntu Server 16.04 LTS (HVM),EBS General Purpose (SSD) Volume Type
+ami_base: ami-f4cc1de2
+default_public_subnet: subnet-8f6d41d6

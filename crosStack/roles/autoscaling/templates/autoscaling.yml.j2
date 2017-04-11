@@ -1,0 +1,83 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: {{ stack_prefix }} AutoScaling Group
+
+####### Services creation #########
+Resources:
+  AutoScaling:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !ImportValue LaunchConfig
+      MinSize: {{ min_size }}
+      MaxSize: {{ max_size }}
+      VPCZoneIdentifier:
+      - !ImportValue pub1a
+      - !ImportValue pub1b
+      - !ImportValue pub1c
+      - !ImportValue pub1d
+      - !ImportValue pub1e
+      LoadBalancerNames:
+        - !ImportValue {{ stack_prefix }}-ELB
+
+  ScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScaling
+      PolicyType: SimpleScaling
+      Cooldown: 30
+      ScalingAdjustment: {{ add_num_ins }}
+
+  ## Alarms ##
+
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      AlarmDescription: Alarm if CPU too high or metric disappears indicating instance is down
+      Period: 60
+      AlarmActions:
+        - !Ref ScaleUpPolicy
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScaling
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUUtilization
+      Threshold: {{ cpu_max }}
+
+
+  ScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScaling
+      PolicyType: SimpleScaling
+      Cooldown: 10
+      ScalingAdjustment: {{ down_num_ins }}
+
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      AlarmDescription: Alarm if CPU too low
+      Period: 60
+      AlarmActions:
+        - !Ref ScaleDownPolicy
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScaling
+      ComparisonOperator: LessThanThreshold
+      MetricName: CPUUtilization
+      Threshold: {{ cpu_min }}
+
+######### Outputs ##########
+Outputs:
+  AUId:
+    Description: Autoscaling group
+    Value: !Ref AutoScaling
+    Export:
+      Name: AutoScaling

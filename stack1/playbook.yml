@@ -1,0 +1,6 @@
+---
+- name:
+  hosts: localhost
+  roles:
+    - stack1
+    

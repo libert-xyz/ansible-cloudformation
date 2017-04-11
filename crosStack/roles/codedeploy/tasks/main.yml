@@ -1,0 +1,16 @@
+---
+- name: "{{ stack_prefix }}-CodeDeploy"
+  template:
+    src: codedeploy.yml.j2
+    dest: rendered_templates/codedeploy.yml
+
+- name: "Create {{ stack_prefix }}-CodeDeploy"
+  cloudformation:
+    stack_name: "{{stack_prefix}}-CodeDeploy"
+    state: present
+    disable_rollback: true
+    region: "{{region}}"
+    template: rendered_templates/codedeploy.yml
+    tags:
+      Stack: "{{stack_prefix}}-CodeDeploy"
+  register: codedeploy_stack

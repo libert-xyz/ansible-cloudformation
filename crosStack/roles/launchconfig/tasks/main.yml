@@ -1,0 +1,16 @@
+---
+- name: "{{ stack_prefix }}-Elb"
+  template:
+    src: launchconfig.yml.j2
+    dest: rendered_templates/launchconfig.yml
+
+- name: "Create {{ stack_prefix }}-LaunchConfig"
+  cloudformation:
+    stack_name: "{{stack_prefix}}-LaunchConfig"
+    state: present
+    disable_rollback: true
+    region: "{{region}}"
+    template: rendered_templates/launchconfig.yml
+    tags:
+      Stack: "{{stack_prefix}}-LaunchConfig"
+  register: launchConfig_stack
