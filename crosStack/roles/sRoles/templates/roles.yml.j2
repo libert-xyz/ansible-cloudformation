@@ -31,13 +31,22 @@ Resources:
                 Action: "s3:*"
                 Resource: "*"
         -
-          PolicyName: !Join ["-",["CloudWatch", !Ref "AWS::Region"]]
+          PolicyName: !Join ["-",["ASGLifecycle", !Ref "AWS::Region"]]
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               -
                 Effect: "Allow"
-                Action: "cloudwatch:PutMetricAlarm"
+                Action:
+                  - elasticloadbalancing:Describe*
+                  - elasticloadbalancing:DeregisterInstancesFromLoadBalancer
+                  - elasticloadbalancing:RegisterInstancesWithLoadBalancer
+                  - autoscaling:Describe*
+                  - autoscaling:EnterStandby
+                  - autoscaling:ExitStandby
+                  - autoscaling:UpdateAutoScalingGroup
+                  - autoscaling:SuspendProcesses
+                  - autoscaling:ResumeProcesses
                 Resource: "*"
 
   #### IAM Instance Role ####

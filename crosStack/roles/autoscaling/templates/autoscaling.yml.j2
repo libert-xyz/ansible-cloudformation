@@ -19,6 +19,8 @@ Resources:
       LoadBalancerNames:
         - !ImportValue {{ stack_prefix }}-ELB
 
+      HealthCheckType: ELB
+
   ScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:

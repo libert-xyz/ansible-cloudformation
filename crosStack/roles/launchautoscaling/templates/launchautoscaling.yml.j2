@@ -89,7 +89,7 @@ Resources:
 
           apt-get -y update
           apt-get -y install python-pip
-
+          pip install awscli
           pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
           cp /usr/local/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
@@ -118,6 +118,9 @@ Resources:
       - !ImportValue pub1e
       LoadBalancerNames:
         - !ImportValue {{ stack_prefix }}-ELB
+
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
 
     CreationPolicy:
       ResourceSignal:
