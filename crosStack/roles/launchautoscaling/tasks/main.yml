@@ -1,0 +1,16 @@
+---
+- name: "{{ stack_prefix }}-LaunchConfigAutoScaling"
+  template:
+    src: launchautoscaling.yml.j2
+    dest: rendered_templates/launchautoscaling.yml
+
+- name: "Create {{ stack_prefix }}-LaunchConfigAutoScaling"
+  cloudformation:
+    stack_name: "{{stack_prefix}}-LaunchConfigAutoScaling"
+    state: present
+    disable_rollback: true
+    region: "{{region}}"
+    template: rendered_templates/launchautoscaling.yml
+    tags:
+      Stack: "{{stack_prefix}}-LaunchConfigAutoScaling"
+  register: launchConfig_stack

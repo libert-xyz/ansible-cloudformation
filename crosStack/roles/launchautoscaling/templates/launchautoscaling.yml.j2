@@ -1,0 +1,201 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: {{ stack_prefix}} Launch Configuration & Autocaling
+
+
+####### Services creation #########
+Resources:
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          ascending:
+            - "config"
+            - "config2"
+            - "config3"
+        config:
+          packages:
+            apt:
+              ruby: []
+              wget: []
+              build-essential: []
+              libssl-dev: []
+              libffi-dev: []
+              python-dev: []
+
+          commands:
+            pip1:
+              command: "pip install cryptography"
+              cwd: "~"
+              ignoreErrors: "false"
+
+            pip2:
+              command: "pip install ansible==2.2.0"
+              cwd: "~"
+              ignoreErrors: "false"
+
+            mkdir:
+              command: "mkdir -p /tmp/ansible"
+              cwd: "~"
+              ignoreErrors: "false"
+
+
+        config2:
+          commands:
+            cmd1:
+              command: "git clone -b dev https://github.com/rschmidtz/ansible-flask.git /tmp/ansible/"
+              cwd: "~"
+              ignoreErrors: "false"
+
+            cmd2:
+              command: "/usr/local/bin/ansible-playbook /tmp/ansible/playbook.yml --connection=local -i /tmp/ansible/hosts.example
+    "
+              cwd: "~"
+              ignoreErrors: "false"
+
+        config3:
+          commands:
+            test1:
+              command: "wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install"
+              cwd: "/home/ubuntu"
+              ignoreErrors: "false"
+            test2:
+              command: "chmod +x ./install && ./install auto"
+              cwd: "/home/ubuntu"
+              ignoreErrors: "false"
+
+          services:
+            sysvinit:
+              codedeploy-agent:
+                enabled: "true"
+                ensureRunning: "true"
+
+    Properties:
+      AssociatePublicIpAddress: true
+      ImageId: {{ ami }}
+      InstanceType: {{ instanceType }}
+      SecurityGroups:
+      - !ImportValue instanceSG
+      InstanceMonitoring: false
+      KeyName: {{ pem }}
+      IamInstanceProfile: !ImportValue instancerole
+      UserData:
+        'Fn::Base64': !Sub |
+          #! /bin/bash
+
+          set -o errexit
+          export LC_ALL='en_US.UTF-8'
+
+          apt-get -y update
+          apt-get -y install python-pip
+
+          pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+
+          cp /usr/local/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
+          chmod +x /etc/init.d/cfn-hup
+          update-rc.d cfn-hup defaults
+          service cfn-hup start
+
+          cfn-init -v --stack ${AWS::StackName} --resource LaunchConfig --region ${AWS::Region} -c ascending
+          cfn-signal -e $? --stack ${AWS::StackName} --resource AutoScaling --region ${AWS::Region}
+
+
+#### AUTOSCALING #######
+
+
+  AutoScaling:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref LaunchConfig
+      MinSize: {{ min_size }}
+      MaxSize: {{ max_size }}
+      VPCZoneIdentifier:
+      - !ImportValue pub1a
+      - !ImportValue pub1b
+      - !ImportValue pub1c
+      - !ImportValue pub1d
+      - !ImportValue pub1e
+      LoadBalancerNames:
+        - !ImportValue {{ stack_prefix }}-ELB
+
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: PT5M
+
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: 1
+        MaxBatchSize: 1
+        PauseTime: PT10M
+        WaitOnResourceSignals: true
+
+  ScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScaling
+      PolicyType: SimpleScaling
+      Cooldown: 30
+      ScalingAdjustment: {{ add_num_ins }}
+
+  ## Alarms ##
+
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      AlarmDescription: Alarm if CPU too high or metric disappears indicating instance is down
+      Period: 60
+      AlarmActions:
+        - !Ref ScaleUpPolicy
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScaling
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUUtilization
+      Threshold: {{ cpu_max }}
+
+
+  ScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScaling
+      PolicyType: SimpleScaling
+      Cooldown: 10
+      ScalingAdjustment: {{ down_num_ins }}
+
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      AlarmDescription: Alarm if CPU too low
+      Period: 60
+      AlarmActions:
+        - !Ref ScaleDownPolicy
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScaling
+      ComparisonOperator: LessThanThreshold
+      MetricName: CPUUtilization
+      Threshold: {{ cpu_min }}
+
+######### Outputs ##########
+Outputs:
+  LaunchConfig:
+    Description: Launch Configuration
+    Value: !Ref LaunchConfig
+#    Export:
+#      Name: LaunchConfig
+
+  AUId:
+    Description: Autoscaling group
+    Value: !Ref AutoScaling
+    Export:
+      Name: AutoScaling

@@ -5,6 +5,7 @@
     - vpc
     - sRoles
     - elb
-    - launchconfig
-    - autoscaling
+#    - launchconfig
+    - launchautoscaling
+#    - autoscaling
     - codedeploy

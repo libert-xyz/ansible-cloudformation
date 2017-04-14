@@ -21,27 +21,37 @@ Resources:
           #! /bin/bash
 
           set -o errexit
+          export LC_ALL='en_US.UTF-8'
 
-          apt-get update -y
+          apt-get -y update
           apt-get -y install python-pip
+          apt-get -y install ruby
+          apt-get -y install wget
           apt-get -y install build-essential libssl-dev libffi-dev python-dev
 
-          export LC_ALL='en_US.UTF-8'
+
+          pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
           pip install cryptography
           pip install ansible==2.2.0
 
-          apt-get -y install ruby
-          apt-get -y install wget
+          cp /usr/local/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
+          chmod +x /etc/init.d/cfn-hup
+          update-rc.d cfn-hup defaults
+          service cfn-hup start
+
           cd /home/ubuntu
           wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install
           chmod +x ./install
           ./install auto
           service codedeploy-agent start
 
-
           mkdir -p /tmp/ansible
           git clone -b dev https://github.com/rschmidtz/ansible-flask.git /tmp/ansible/
           /usr/local/bin/ansible-playbook /tmp/ansible/playbook.yml --connection=local -i /tmp/ansible/hosts.example
+
+          cfn-init -v --stack ${AWS::StackName} --resource LaunchConfig --region ${AWS::Region}
+          cfn-signal -e $? --stack ansible-autoscaling --resource AutoScaling --region ${AWS::Region}
+
 
 ######### Outputs ##########
 Outputs:

@@ -24,7 +24,7 @@ Resources:
         Revision:
           RevisionType: GitHub
           GitHubLocation:
-            CommitId: 9ffb5872e23ef05a78eac87fcc13e327e094da9d
+            CommitId: c73dc1438f5b74134a5f04caf98dbf5f71d68750
             Repository: rschmidtz/baseApp
       ServiceRoleArn: !ImportValue CodeDeployRole
 
